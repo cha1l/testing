@@ -1,0 +1,6 @@
+addr = ":8080"
+
+gin_mode = "release"
+log_level = "debug"
+
+max_containers = -1
