@@ -5,12 +5,12 @@ import (
 	"bytes"
 	"constester-go/internal/repository"
 	"context"
+	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
 	"io"
-	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -28,24 +28,16 @@ func NewClientDocker() (*ClientDocker, error) {
 }
 
 // RunTestsCPP runs the c++ code tests in the task by its id
-func (cl *ClientDocker) RunTestsCPP(ctx context.Context, tests []repository.Test, duration time.Duration) (any, error) {
+func (cl *ClientDocker) RunTestsCPP(ctx context.Context, tests []repository.Test, duration time.Duration, code []byte) (any, error) {
 	containerName := GenerateContainerName()
 	imageName := "cxx-image"
-
-	logConfig := container.LogConfig{
-		Type: "json-file",
-	}
-
-	hostConfig := container.HostConfig{
-		LogConfig: logConfig,
-	}
 
 	create, err := cl.Client.ContainerCreate(ctx, &container.Config{
 		Image:        imageName,
 		Tty:          true,
 		AttachStdout: true,
 		AttachStderr: true,
-	}, &hostConfig, nil, nil, containerName)
+	}, nil, nil, nil, containerName)
 	if err != nil {
 		return nil, err
 	}
@@ -58,11 +50,6 @@ func (cl *ClientDocker) RunTestsCPP(ctx context.Context, tests []repository.Test
 
 	if err := cl.Client.ContainerStart(ctx, create.ID, types.ContainerStartOptions{}); err != nil {
 		panic(err)
-	}
-
-	code, err := os.ReadFile("cpp/main.cpp")
-	if err != nil {
-		return nil, err
 	}
 
 	// inserting code
@@ -95,11 +82,18 @@ func (cl *ClientDocker) RunTestsCPP(ctx context.Context, tests []repository.Test
 			return nil, err
 		}
 
-		log.Warningf("Test: %s Output: %s ", test.Name, output)
+		//todo : add difference between error and wrong test
+
+		if output != test.Expected {
+			msg := fmt.Sprintf("Failed on test %d", test.Name)
+			return msg, nil
+		}
 
 	}
 
-	return nil, nil
+	log.Info("successful testing")
+
+	return "You got it", nil
 }
 
 // RunCodeInContainer runs the code in container with containerID

@@ -18,7 +18,7 @@ func (h *Handler) ApiErrorResponse(c *gin.Context, code int, error string) {
 	data := map[string]interface{}{
 		"error": error,
 	}
-	log.Warn(error)
+	log.Error(error)
 	c.JSON(code, data)
 }
 

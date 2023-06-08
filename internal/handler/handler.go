@@ -21,7 +21,7 @@ func (h *Handler) InitEndpoints() *gin.Engine {
 	api := r.Group("/api")
 	{
 		api.GET("/test", h.TestEndpoint)
-		api.GET("/code", h.TestingCodeEndpoint)
+		api.POST("/code", h.TestingCodeEndpoint)
 		api.POST("/create", h.AddTaskEndpoint)
 	}
 

@@ -6,7 +6,7 @@ import (
 )
 
 type Tasks interface {
-	GetTests() ([]Test, time.Duration, error)
+	GetTests(taskName string) ([]Test, time.Duration, error)
 	GetText()
 	InsertTask(task Task) error
 }

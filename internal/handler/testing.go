@@ -1,9 +1,29 @@
 package handler
 
-import "github.com/gin-gonic/gin"
+import (
+	"constester-go/internal/docker"
+	"context"
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
 
 func (h *Handler) TestingCodeEndpoint(c *gin.Context) {
+	var code docker.Code
 
-	// endpoint in api, which call code testing
+	if err := c.BindJSON(&code); err != nil {
+		h.ApiErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 
+	ctx := context.Background()
+	res, err := h.service.RunTestsCPP(ctx, code)
+	if err != nil {
+		h.ApiErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	data := map[string]interface{}{
+		"res": res,
+	}
+	c.JSON(http.StatusOK, data)
 }

@@ -8,7 +8,7 @@ import (
 
 type Tasks interface {
 	AddTask(task repository.Task) error
-	RunTestsCPP(ctx context.Context) error
+	RunTestsCPP(ctx context.Context, code docker.Code) (any, error)
 }
 
 type Service struct {

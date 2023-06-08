@@ -31,7 +31,7 @@ func NewTaskRepository(db *mongo.Database) *TaskRepository {
 	}
 }
 
-func (t *TaskRepository) GetTests() ([]Test, time.Duration, error) {
+func (t *TaskRepository) GetTests(taskName string) ([]Test, time.Duration, error) {
 
 	// todo : get tests from data base
 

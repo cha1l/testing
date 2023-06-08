@@ -6,8 +6,13 @@ import (
 	"time"
 )
 
+type Code struct {
+	TaskName string `json:"task_name"`
+	Code     string `json:"code"`
+}
+
 type Container interface {
-	RunTestsCPP(ctx context.Context, tests []repository.Test, duration time.Duration) (any, error)
+	RunTestsCPP(ctx context.Context, tests []repository.Test, duration time.Duration, code []byte) (any, error)
 }
 
 type Image struct {
