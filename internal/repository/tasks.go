@@ -32,26 +32,21 @@ func NewTaskRepository(db *mongo.Database) *TaskRepository {
 }
 
 func (t *TaskRepository) GetTests(taskName string) ([]Test, time.Duration, error) {
+	ctx := context.TODO()
 
-	// todo : get tests from data base
+	var (
+		opt  options.FindOneOptions
+		task Task
+	)
 
-	return []Test{
-		{
-			Name:     1,
-			Input:    "1\n2 3",
-			Expected: "6",
-		},
-		{
-			Name:     2,
-			Input:    "11\n12 5",
-			Expected: "28",
-		},
-		{
-			Name:     3,
-			Input:    "6 7\n9",
-			Expected: "22",
-		},
-	}, 1 * time.Second, nil
+	filter := bson.M{"name": taskName}
+	opt.SetProjection(bson.M{"tests": 1, "duration": 1})
+
+	if err := t.coll.FindOne(ctx, filter, &opt).Decode(&task); err != nil {
+		return nil, 0, err
+	}
+
+	return task.Tests, task.Duration, nil
 }
 
 func (t *TaskRepository) GetText() {
@@ -61,7 +56,7 @@ func (t *TaskRepository) GetText() {
 }
 
 func (t *TaskRepository) InsertTask(task Task) error {
-	ctx := context.TODO()
+	ctx := context.Background()
 
 	mod := mongo.IndexModel{
 		Keys: bson.M{
@@ -82,6 +77,36 @@ func (t *TaskRepository) InsertTask(task Task) error {
 	}
 
 	return nil
+}
+
+func (t *TaskRepository) GetAllTasks() (*[]Task, error) {
+	cxt := context.Background()
+
+	var (
+		tasks []Task
+		opts  options.FindOptions
+	)
+
+	opts.SetProjection(bson.M{"name": 1, "text": 1, "duration": 1})
+
+	cur, err := t.coll.Find(cxt, bson.D{{}}, &opts)
+	if err != nil {
+		return nil, err
+	}
+
+	for cur.Next(cxt) {
+		var task Task
+
+		if err := cur.Decode(&task); err != nil {
+			return nil, err
+		}
+
+		tasks = append(tasks, task)
+	}
+
+	err = cur.Err()
+
+	return &tasks, err
 }
 
 func SetBool(value bool) *bool {

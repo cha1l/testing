@@ -4,6 +4,7 @@ import (
 	"constester-go/internal/docker"
 	"constester-go/internal/repository"
 	"context"
+	"errors"
 )
 
 type TaskService struct {
@@ -26,13 +27,24 @@ func (t *TaskService) AddTask(task repository.Task) error {
 	return t.repo.InsertTask(task)
 }
 
-func (t *TaskService) RunTestsCPP(ctx context.Context, code docker.Code) (any, error) {
+func (t *TaskService) RunTests(ctx context.Context, code docker.Code) (docker.TestResult, error) {
 	tests, dur, err := t.repo.GetTests(code.TaskName)
 	if err != nil {
-		return nil, err
+		return docker.TestResult{}, err
 	}
 
-	res, err := t.container.RunTestsCPP(ctx, tests, dur, []byte(code.Code))
+	var res docker.TestResult
+
+	switch code.Language {
+	case "cpp":
+		res, err = t.container.RunTestsCPP(ctx, tests, dur, []byte(code.Code))
+	default:
+		return docker.TestResult{}, errors.New("invalid or unsupported language")
+	}
 
 	return res, err
+}
+
+func (t *TaskService) GetAllTasks() (*[]repository.Task, error) {
+	return t.repo.GetAllTasks()
 }

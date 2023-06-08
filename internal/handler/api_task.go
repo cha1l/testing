@@ -3,6 +3,7 @@ package handler
 import (
 	"constester-go/internal/repository"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -19,5 +20,16 @@ func (h *Handler) AddTaskEndpoint(c *gin.Context) {
 		return
 	}
 
-	h.SuccessfulResponse(c, "the task was successfully inserted")
+	c.AbortWithStatus(http.StatusOK)
+	log.Infof("Task %s was created\n", task.Name)
+}
+
+func (h *Handler) GetAllTasksEndpoint(c *gin.Context) {
+	tasks, err := h.service.Tasks.GetAllTasks()
+	if err != nil {
+		h.ApiErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, tasks)
 }

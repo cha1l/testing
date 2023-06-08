@@ -42,11 +42,11 @@ func main() {
 
 	db, err := repository.ConnectToDB()
 	if err != nil {
-		log.Fatal("failed connecting to mongo db ", err)
+		log.Fatalf("failed connecting to mongo db: %s\n", err)
 	}
 	client, err := docker.NewClientDocker()
 	if err != nil {
-		log.Fatal("failed connecting to docker ", err)
+		log.Fatalf("failed connecting to docker: %s\n", err)
 	}
 
 	repo := repository.NewRepository(db)

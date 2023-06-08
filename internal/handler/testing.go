@@ -16,14 +16,11 @@ func (h *Handler) TestingCodeEndpoint(c *gin.Context) {
 	}
 
 	ctx := context.Background()
-	res, err := h.service.RunTestsCPP(ctx, code)
+	res, err := h.service.RunTests(ctx, code)
 	if err != nil {
 		h.ApiErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	data := map[string]interface{}{
-		"res": res,
-	}
-	c.JSON(http.StatusOK, data)
+	c.JSON(http.StatusOK, res)
 }

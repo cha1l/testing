@@ -9,6 +9,7 @@ type Tasks interface {
 	GetTests(taskName string) ([]Test, time.Duration, error)
 	GetText()
 	InsertTask(task Task) error
+	GetAllTasks() (*[]Task, error)
 }
 
 type Repository struct {
